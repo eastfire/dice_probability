@@ -49,6 +49,7 @@ export default {
     startCalculate() {
       var face_indexs = [];
       var totalMap = {};
+      var typeMap = {};
       var diceCount = this.dices.length
       var currentIndex = 0;
       for ( var i = 0 ; i < diceCount; i++ ) {
@@ -70,15 +71,72 @@ export default {
           }
         }
       }
-      while (!isFinished){
+      var saveType = function(count, threshold, typeName, typeMap){
+        if ( count >= threshold) {
+          //save typeMap
+          var key = typeName+count;
+          if ( undefined === typeMap[key] ) {
+            typeMap[key] = 1;
+          } else typeMap[key] ++;
+        }
+      }
 
+      var judgeType = function(sortedArray, typeMap) {
+        var sameCount = 0;
+        var straightCount = 0;
+        var currentSameFace = null;
+        var currentSameCount = 0;
+        var currentStraightCount = 0;
+        var currentStraightHead = null;
+        var maxSameCount = 0;
+        var maxStraightCount = 0;
+        for ( var i = 0; i < sortedArray.length; i++ ) {
+          var currentFace = sortedArray[i];
+          if ( currentFace === currentSameFace ) {
+            currentSameCount++;
+          } else {
+            if ( maxSameCount < currentSameCount ) {
+              maxSameCount = currentSameCount;
+            }
+            currentSameFace = currentFace;
+            currentSameCount = 1;
+          }
+
+          if ( currentFace === currentStraightHead+1 ) {
+            currentStraightCount++;
+          } else {
+            if ( maxStraightCount < currentStraightCount ) {
+              maxStraightCount = currentStraightCount;
+            }
+
+            currentStraightHead = currentFace;
+            currentStraightCount = 1;
+          }
+        }
+        if ( maxSameCount < currentSameCount ) {
+          maxSameCount = currentSameCount;
+        }
+        if ( maxStraightCount < currentStraightCount ) {
+          maxStraightCount = currentStraightCount;
+        }
+        if ( maxSameCount == 1 ) {
+          saveType(sortedArray.length, 0, "全不同", typeMap);
+        }
+        saveType(maxSameCount, 2, "同数", typeMap);
+        saveType(maxStraightCount, 3, "顺子", typeMap);
+      }
+      while (!isFinished){
+        var currentFaces = [];
         var total = 0;
         for ( var i = 0; i < diceCount; i++ ){
-          total+= this.dices[i].faces[face_indexs[i]];
+          total+= (currentFaces[i]=this.dices[i].faces[face_indexs[i]]);
         }
         if ( undefined === totalMap[total] ) {
           totalMap[total] = 1;
         } else totalMap[total] ++;
+        //judge type
+        var sortedFaces = currentFaces.sort();
+        judgeType(sortedFaces, typeMap)
 
         currentIndex = 0;
         improveIndex(this.dices);
@@ -86,11 +144,18 @@ export default {
 
       //output
       var keys = _.keys(totalMap);
-      var sum = _.reduce(keys, function(memo, key){ return memo + totalMap[key]; }, 0);
+      var sum = _.reduce(this.dices, function(memo, dice){ return memo * dice.faces.length; }, 1);
 
       this.results = [];
       _.each ( keys, function(key) {
         this.results.push("总值"+key+"："+totalMap[key]+"/"+sum+" "+Math.round(totalMap[key]/sum*10000)/100+"%")
+      },this)
+
+      this.results.push("-----------------");
+
+      var keys = _.keys(typeMap).sort();
+      _.each ( keys, function(key) {
+        this.results.push(key+"："+typeMap[key]+"/"+sum+" "+Math.round(typeMap[key]/sum*10000)/100+"%")
       },this)
     }
   }
