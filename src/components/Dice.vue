@@ -28,10 +28,11 @@ export default {
 .dice{
   display: flex;
   flex-direction: row;
-  justify-content: space-around;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  flex-flow: row wrap;
 }
 .face-input {
-  width: 50px;
-  flex-grow: 1;
+  width: 25px;
 }
 </style>
