@@ -1,8 +1,13 @@
 <template>
   <div id="app">
-    <button class="add-dice" @click='addDice' :disabled="dices.length>=8">+</button>
-    <Dice v-for="dice in dices" :number="dice.number" :faces="dice.faces"/>
-    <button class="start-calculate" @click='startCalculate'>Calculate</button>
+    <div class="add-dices">
+      <button class="add-dice" @click='addD4' :disabled="dices.length>=8">+d4</button>
+      <button class="add-dice" @click='addD6' :disabled="dices.length>=8">+d6</button>
+      <button class="add-dice" @click='addD8' :disabled="dices.length>=8">+d8</button>
+      <button class="add-dice" @click='addD10' :disabled="dices.length>=8">+d10</button>
+    </div>
+    <Dice v-for="dice in dices" :number="dice.number" :faces="dice.faces" v-on:removeself="onDeleteDice"/>
+    <button class="start-calculate" @click='startCalculate' :disabled="dices.length<=0">Calculate</button>
     <div v-for="result in results">{{result}}</div>
   </div>
 </template>
@@ -22,8 +27,24 @@ export default {
     Dice
   },
   methods: {
-    addDice(){
+    addD4(){
+      this.dices.push({number:this.dices.length+1, faces:[1,2,3,4]})
+    },
+    addD6(){
       this.dices.push({number:this.dices.length+1, faces:[1,2,3,4,5,6]})
+    },
+    addD8(){
+      this.dices.push({number:this.dices.length+1, faces:[1,2,3,4,5,6,7,8]})
+    },
+    addD10(){
+      this.dices.push({number:this.dices.length+1, faces:[1,2,3,4,5,6,7,8,9,10]})
+    },
+    onDeleteDice(number){
+      this.dices.splice(number-1,1);
+      //recalculate number
+      for ( var i = 0 ;i < this.dices.length; i++ ) {
+        this.dices[i].number = i+1;
+      }
     },
     startCalculate() {
       var face_indexs = [];
@@ -85,7 +106,7 @@ export default {
   color: #2c3e50;
   margin-top: 60px;
 }
-.add-dice, .start-calculate {
+.add-dices, .start-calculate {
   width: 100%;
 }
 </style>

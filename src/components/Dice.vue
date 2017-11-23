@@ -2,7 +2,7 @@
   <div class="dice">
     <div class="number">{{number}}.</div>
       <input v-for="(face,index) in faces" class="face-input" v-model="faces[index]" type="number"></input>
-    <button class="delete-dice">-</button>
+    <button class="delete-dice" @click="onDelete">-</button>
   </div>
 </template>
 
@@ -13,6 +13,11 @@ export default {
   data () {
     return {
       face_number: 6
+    }
+  },
+  methods:{
+    onDelete(){
+      this.$emit('removeself', this.number)
     }
   }
 }
